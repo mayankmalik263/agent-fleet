@@ -90,7 +90,7 @@ subscription you need **no Anthropic API key**.
 
 ---
 
-## 🏗️ How it works
+## 🧱 How it works
 
 Agent Fleet has five parts. They share **one service layer** and **one event log**.
 
@@ -266,7 +266,7 @@ claude mcp add agent-fleet --scope user -- uv run --quiet --directory C:/path/to
 
 ---
 
-## 🧑‍💻 Using Agent Fleet
+## 💻 Using Agent Fleet
 
 ### Start a run from the dashboard
 
@@ -308,7 +308,7 @@ timeline as `tool.failed` events.
 
 ---
 
-## 🖥️ The dashboard
+## 📊 The dashboard
 
 <table>
 <tr>
@@ -402,7 +402,7 @@ from payloads, messages and logs).
 
 ---
 
-## 🛡️ Security model
+## 🔒 Security model
 
 Agent Fleet is a **local, single-user** tool. Its local mode is **not** a multi-tenant SaaS security model.
 
@@ -424,7 +424,7 @@ redistribute Claude Code, and it refuses to run in commercial mode. Full model a
 
 ---
 
-## ⚙️ Configuration
+## 🔧 Configuration
 
 All settings are environment variables with the `AGENT_FLEET_` prefix, read from `.env`. The most useful ones:
 
@@ -444,7 +444,7 @@ The full list with comments is in [`.env.example`](.env.example) and [docs/DEVEL
 
 ---
 
-## 🗂️ Project structure
+## 📁 Project structure
 
 ```text
 agent-fleet/
@@ -515,7 +515,7 @@ $env:AGENT_FLEET_REAL_CLAUDE_SMOKE="1"; uv run --directory apps/backend pytest -
 
 ---
 
-## 🗺️ Roadmap
+## 📍 Roadmap
 
 - [x] Local control plane, event log, REST API and SSE
 - [x] MCP server for Claude Code (13 tools)
