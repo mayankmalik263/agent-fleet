@@ -1,0 +1,24 @@
+[project]
+name = "agent-fleet"
+version = "0.1.0"
+description = "Agent Fleet: MCP server for recording multi-agent runs and events in SQLite"
+readme = "README.md"
+authors = [
+    { name = "mayankmalik263", email = "mayankmalik263@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp[cli]>=2.3.0",
+]
+
+[project.scripts]
+agent-fleet = "agent_fleet:main"
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
