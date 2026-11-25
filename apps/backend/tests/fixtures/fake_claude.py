@@ -228,6 +228,25 @@ async def main() -> None:
         assistant([{"type": "tool_use", "id": "toolu_x", "name": "Grep", "input": {"pattern": "TODO"}}])
         tool_result("toolu_x", "denied", is_error=True)
         result("Finished despite noise.")
+    elif SCENARIO == "async_agent":
+        # A background subagent: the Agent tool returns before the subagent works. The result text
+        # reports the launch settings the fake received, so a test can check them.
+        init()
+        tools = arg("--tools") or ""
+        background = os.environ.get("CLAUDE_CODE_DISABLE_BACKGROUND_TASKS", "")
+        assistant(
+            [
+                {
+                    "type": "tool_use",
+                    "id": "toolu_bg",
+                    "name": "Agent",
+                    "input": {"subagent_type": "researcher", "description": "bg", "prompt": "Find papers"},
+                }
+            ]
+        )  # noqa: E501
+        tool_result("toolu_bg", "Async agent launched successfully.\nagentId: a1 (internal ID)")
+        assistant([{"type": "text", "text": "Working."}], parent="toolu_bg")
+        result(f"tools={tools};disable_background={background}")
     elif SCENARIO == "crash":
         init()
         sys.stderr.write("fatal: something broke\n")

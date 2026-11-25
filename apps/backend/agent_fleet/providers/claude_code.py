@@ -44,7 +44,7 @@ def build_args(command: list[str], request: ExecutionRequest, settings: Settings
         # add hooks or permission rules to an unattended run. The user's own settings still apply.
         "--setting-sources",
         "user",
-        *policy_args(request.permission_policy, settings),
+        *policy_args(request.permission_policy, settings, web_access=request.web_access),
     ]
 
 
@@ -63,6 +63,9 @@ class ClaudeCodeLocalRuntime:
         args = build_args(self.command, request, self.settings)
         env = child_env(self.settings)
         env["CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS"] = str(request.max_concurrent_agents)
+        # Subagents must run in the foreground. A background subagent returns at once ("Async agent
+        # launched"), so the orchestrator cannot wait for its result and the dashboard cannot see its end.
+        env["CLAUDE_CODE_DISABLE_BACKGROUND_TASKS"] = "1"
         proc = await process.start(args, cwd=request.cwd, env=env)
         log.info("Claude Code started (pid %s) for run %s", proc.pid, request.run_id)
 

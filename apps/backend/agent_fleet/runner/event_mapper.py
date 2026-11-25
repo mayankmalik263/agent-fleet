@@ -7,6 +7,8 @@ What is recorded (public, structured data only):
 - assistant text         -> agent message (public output of that agent)
 - assistant tool_use     -> tool.started; the Agent/Task tool is a delegation that creates or links a subagent
 - user tool_result       -> tool.completed / tool.failed; for a delegation the subagent is completed / failed
+                           and its final answer becomes a result message. "Async agent launched" (a background
+                           subagent) is not an end: the agent keeps running until it reports or the run ends.
 - result                 -> execution.usage_reported (cost is a client-side estimate), permission denials
 Thinking blocks are never read or stored. Unknown message types are counted and ignored, so a newer
 Claude Code version with extra message types does not break the run.
@@ -39,6 +41,9 @@ log = logging.getLogger(__name__)
 DELEGATION_TOOLS = {"Agent", "Task"}
 AGENT_ID_MARKER = re.compile(r"AGENT_FLEET_AGENT_ID:\s*([0-9a-fA-F-]{36})")
 TASK_ID_MARKER = re.compile(r"AGENT_FLEET_TASK_ID:\s*([0-9a-fA-F-]{36})")
+ASYNC_LAUNCH_PREFIX = "Async agent launched"
+# The final answer of a subagent is its report to the orchestrator; keep enough of it to read in the UI.
+SUBAGENT_RESULT_CHARS = 8_000
 AUTH_ERRORS = {"authentication_failed", "oauth_org_not_allowed", "account_on_hold"}
 QUIET_SYSTEM_SUBTYPES = {
     "hook_started",
@@ -79,13 +84,46 @@ def _summarize_input(tool: str, data: Any) -> str:
     return f"arguments: {keys}" if keys else ""
 
 
-def _result_preview(content: Any) -> str:
+def _result_text(content: Any) -> str:
     if isinstance(content, str):
-        return redact_text(content, 500)
+        return content
     if isinstance(content, list):
         texts = [c.get("text", "") for c in content if isinstance(c, dict) and c.get("type") == "text"]
-        return redact_text(" ".join(t for t in texts if isinstance(t, str)), 500)
+        return "\n".join(t for t in texts if isinstance(t, str))
     return ""
+
+
+def _result_preview(content: Any, limit: int = 500) -> str:
+    text = _result_text(content)
+    return redact_text(text, limit) if text else ""
+
+
+_HANDBACK_TAGS = re.compile(r"<(tools-used-before-summary|usage)>.*?</\1>", re.DOTALL)
+_HANDBACK_START = "[Subagent hand-back]"
+_HANDBACK_BODY = "The report follows:"
+_TRAILING_AGENT_ID = re.compile(r"\n\s*agentId:\s*\S+\s*$")
+
+
+def clean_subagent_result(text: str) -> str:
+    """Keep only the subagent's own report from a delegation tool result.
+
+    Claude Code wraps the report in harness metadata (tools used, a hand-back notice, the internal agent
+    id, token usage) and indents each line by two spaces. None of that is the agent's message.
+    """
+    text = _HANDBACK_TAGS.sub("", text)
+    start = text.find(_HANDBACK_START)
+    if start != -1:
+        body = text.find(_HANDBACK_BODY, start)
+        if body != -1:
+            text = text[body + len(_HANDBACK_BODY) :]
+            text = "\n".join(line[2:] if line.startswith("  ") else line for line in text.split("\n"))
+    text = _TRAILING_AGENT_ID.sub("", text.rstrip())
+    return text.strip()
+
+
+def _is_async_launch(content: Any) -> bool:
+    """True for the immediate tool result of a background subagent (it carries no work result)."""
+    return _result_text(content).lstrip().startswith(ASYNC_LAUNCH_PREFIX)
 
 
 class StreamMapper:
@@ -375,6 +413,12 @@ class StreamMapper:
             sub_id = self.delegations.get(tool_use_id)
             if sub_id and run.status not in RUN_TERMINAL:
                 sub = session.get(Agent, sub_id)
+                if not failed and _is_async_launch(block.get("content")):
+                    # A background subagent: the tool returned before the work. The agent keeps running;
+                    # it reports its own end with MCP, or the run closes it.
+                    continue
+                report = clean_subagent_result(_result_text(block.get("content")))
+                full = redact_text(report, SUBAGENT_RESULT_CHARS) if report else ""
                 if sub is not None and sub.status not in AGENT_TERMINAL:
                     AgentService(session, self.workspace_id, EventSource.RUNNER).update_status(
                         run.id,
@@ -383,11 +427,11 @@ class StreamMapper:
                         message=f"{sub.name} {'failed' if failed else 'finished'}",
                         idempotency_key=f"stream:tool:{tool_use_id}:agent-end",
                     )
-                if sub is not None and preview:
+                if sub is not None and full:
                     MessageService(session, self.workspace_id, EventSource.RUNNER).send(
                         run.id,
                         sub.id,
-                        preview,
+                        full,
                         message_type=MessageType.RESULT,
                         receiver_agent_id=agent_id,
                         idempotency_key=f"stream:tool:{tool_use_id}:result",
