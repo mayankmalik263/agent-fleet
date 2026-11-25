@@ -1,11 +1,13 @@
 "use client";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, RotateCcw } from "lucide-react";
 import { useId, useState } from "react";
 import { AgentAvatar } from "@/components/ui/AgentAvatar";
 import { DetailList } from "@/components/ui/DetailList";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useRunMessages } from "@/hooks/queries";
+import { useRetryRun } from "@/hooks/useRetryRun";
+import { errorMessage } from "@/lib/api";
 import { taskStatusTone, TONE_COLOR } from "@/lib/colors";
 import { formatDateTime, formatTime, humanize, NOT_AVAILABLE, truncate } from "@/lib/format";
 import type { AgentRead, EventRead, TaskRead } from "@/lib/types";
@@ -15,6 +17,21 @@ interface TaskCardProps {
   runId: string;
   agents: Map<string, AgentRead>;
   latestEvent?: EventRead;
+  /** Show "Retry task" for a failed or cancelled task of a finished run. */
+  canRetry?: boolean;
+}
+
+function RetryTask({ runId, taskId }: { runId: string; taskId: string }) {
+  const retry = useRetryRun(runId);
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <button type="button" className="af-btn" disabled={retry.isPending} onClick={() => retry.mutate({ task_id: taskId })}>
+        <RotateCcw aria-hidden size={13} /> {retry.isPending ? "Queuing…" : "Retry task"}
+      </button>
+      <span className="text-[11px] text-fg-3">Queues a new run for this task only.</span>
+      {retry.isError ? <span role="alert" className="text-[11px] text-red">{errorMessage(retry.error)}</span> : null}
+    </div>
+  );
 }
 
 function RelatedMessages({ runId, taskId, agents }: { runId: string; taskId: string; agents: Map<string, AgentRead> }) {
@@ -39,7 +56,7 @@ function RelatedMessages({ runId, taskId, agents }: { runId: string; taskId: str
 }
 
 /** Compact, expandable task card. */
-export function TaskCard({ task, runId, agents, latestEvent }: TaskCardProps) {
+export function TaskCard({ task, runId, agents, latestEvent, canRetry = false }: TaskCardProps) {
   const [open, setOpen] = useState(false);
   const bodyId = useId();
   const assignee = task.assigned_agent_id ? agents.get(task.assigned_agent_id) : undefined;
@@ -99,6 +116,7 @@ export function TaskCard({ task, runId, agents, latestEvent }: TaskCardProps) {
               },
             ]}
           />
+          {canRetry && (task.status === "failed" || task.status === "cancelled") ? <RetryTask runId={runId} taskId={task.id} /> : null}
           <div>
             <div className="af-label mb-1">Related messages</div>
             <RelatedMessages runId={runId} taskId={task.id} agents={agents} />

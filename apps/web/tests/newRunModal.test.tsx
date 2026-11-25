@@ -46,6 +46,7 @@ describe("New Run modal", () => {
       permission_policy: "read_only",
       max_concurrent_agents: 4,
       confirm_workspace_edit: false,
+      web_access: true,
     });
   });
 

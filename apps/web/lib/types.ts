@@ -76,6 +76,15 @@ export interface RunCreate {
   permission_policy: PermissionPolicy;
   max_concurrent_agents: number;
   confirm_workspace_edit: boolean;
+  /** WebSearch and WebFetch for the run's agents. */
+  web_access?: boolean;
+}
+
+export interface RunRetry {
+  /** Retry only this task. Omit to retry the whole run. */
+  task_id?: string | null;
+  /** Default: the value of the original run. */
+  web_access?: boolean | null;
 }
 
 export interface RunRead {
@@ -92,6 +101,8 @@ export interface RunRead {
   permission_policy: PermissionPolicy;
   orchestrator_model: string;
   max_concurrent_agents: number;
+  web_access: boolean;
+  retry_of_run_id: string | null;
   session_id: string | null;
   started_at: string | null;
   completed_at: string | null;

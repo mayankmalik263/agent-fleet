@@ -13,11 +13,14 @@ export interface TasksPanelProps {
   tasks: TaskRead[];
   agents: AgentRead[];
   events: EventRead[];
+  /** The run is finished, so a failed task can be retried in a new run. */
+  runEnded?: boolean;
+  runSource?: string;
   className?: string;
 }
 
 /** Panel C: teamwork tasks with status filters and search. */
-export function TasksPanel({ runId, tasks, agents, events, className = "" }: TasksPanelProps) {
+export function TasksPanel({ runId, tasks, agents, events, runEnded = false, runSource, className = "" }: TasksPanelProps) {
   const [filter, setFilter] = useState<TaskFilter>("all");
   const [search, setSearch] = useState("");
   const agentById = useMemo(() => new Map(agents.map((a) => [a.id, a])), [agents]);
@@ -59,7 +62,7 @@ export function TasksPanel({ runId, tasks, agents, events, className = "" }: Tas
           <ul className="flex flex-col gap-1.5" aria-label="Tasks">
             {visible.map((task) => (
               <li key={task.id}>
-                <TaskCard task={task} runId={runId} agents={agentById} latestEvent={latestByTask.get(task.id)} />
+                <TaskCard task={task} runId={runId} agents={agentById} latestEvent={latestByTask.get(task.id)} canRetry={runEnded && runSource !== "claude_code"} />
               </li>
             ))}
           </ul>

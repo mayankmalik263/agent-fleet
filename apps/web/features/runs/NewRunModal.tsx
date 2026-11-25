@@ -1,6 +1,6 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Globe } from "lucide-react";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { queryKeys, useSystemStatus } from "@/hooks/queries";
@@ -27,7 +27,7 @@ function Field({ label, htmlFor, hint, children }: { label: string; htmlFor: str
 }
 
 function NewRunForm({ onClose, onCreated }: Omit<NewRunModalProps, "open">) {
-  const ids = { title: useId(), desc: useId(), provider: useId(), path: useId(), model: useId(), policy: useId(), max: useId(), confirm: useId() };
+  const ids = { title: useId(), desc: useId(), provider: useId(), path: useId(), model: useId(), policy: useId(), max: useId(), confirm: useId(), web: useId() };
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [workspacePath, setWorkspacePath] = useState("");
@@ -35,6 +35,7 @@ function NewRunForm({ onClose, onCreated }: Omit<NewRunModalProps, "open">) {
   const [policy, setPolicy] = useState<PermissionPolicy>("read_only");
   const [maxAgents, setMaxAgents] = useState(4);
   const [confirmEdit, setConfirmEdit] = useState(false);
+  const [webAccess, setWebAccess] = useState(true);
   const queryClient = useQueryClient();
   // Fetch a fresh runtime status each time the modal opens.
   const system = useSystemStatus({ refetchInterval: false });
@@ -69,6 +70,7 @@ function NewRunForm({ onClose, onCreated }: Omit<NewRunModalProps, "open">) {
       permission_policy: policy,
       max_concurrent_agents: maxAgents,
       confirm_workspace_edit: workspaceEdit && confirmEdit,
+      web_access: webAccess,
     });
   };
 
@@ -145,6 +147,19 @@ function NewRunForm({ onClose, onCreated }: Omit<NewRunModalProps, "open">) {
       >
         <input id={ids.path} className="af-input af-mono" value={workspacePath} onChange={(e) => setWorkspacePath(e.target.value)} placeholder={"D:\\projects\\my-repo"} />
       </Field>
+
+      <label htmlFor={ids.web} className="flex items-start gap-2 rounded-md border border-line-soft bg-panel-2/50 px-3 py-2 text-[12px]">
+        <input id={ids.web} type="checkbox" className="mt-0.5" checked={webAccess} onChange={(e) => setWebAccess(e.target.checked)} />
+        <span>
+          <span className="flex items-center gap-1.5 font-medium text-fg">
+            <Globe aria-hidden size={13} className="text-blue" /> Web access (WebSearch and WebFetch)
+          </span>
+          <span className="block text-fg-2">
+            Needed for research on the internet (papers, documentation, news). Agents send search queries and open web pages.
+            {workspacePath.trim() ? " Turn it off for private code: a web request could carry workspace content." : ""}
+          </span>
+        </span>
+      </label>
 
       {workspaceEdit ? (
         <div role="alert" className="rounded-md border border-orange/50 bg-orange/10 px-3 py-2 text-[12px]">

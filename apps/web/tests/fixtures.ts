@@ -30,6 +30,8 @@ export function makeRun(overrides: Partial<RunRead> = {}): RunRead {
     permission_policy: "read_only",
     orchestrator_model: "sonnet",
     max_concurrent_agents: 4,
+    web_access: false,
+    retry_of_run_id: null,
     session_id: null,
     started_at: at(0),
     completed_at: null,

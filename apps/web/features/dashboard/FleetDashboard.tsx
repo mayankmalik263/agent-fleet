@@ -4,16 +4,18 @@ import { useAgentSelection } from "@/hooks/useAgentSelection";
 import { isRunningAgent } from "@/lib/liveState";
 import { AgentInspector } from "../inspector/AgentInspector";
 import { AgentNetworkPanel } from "../network/AgentNetworkPanel";
+import { ReportPanel } from "../report/ReportPanel";
 import { TasksPanel } from "../tasks/TasksPanel";
 import { TimelinePanel } from "../timeline/TimelinePanel";
 import { DashboardHeader, type HeaderStats } from "./DashboardHeader";
 import { RunScope, type RunScopeContext } from "./RunScope";
 
-type MobileView = "network" | "timeline" | "tasks";
+type MobileView = "network" | "timeline" | "tasks" | "report";
 const MOBILE_VIEWS: { id: MobileView; label: string }[] = [
   { id: "network", label: "Network" },
   { id: "timeline", label: "Timeline" },
   { id: "tasks", label: "Tasks" },
+  { id: "report", label: "Report" },
 ];
 
 function DashboardBody({ ctx }: { ctx: RunScopeContext }) {
@@ -27,7 +29,7 @@ function DashboardBody({ ctx }: { ctx: RunScopeContext }) {
   const show = (view: MobileView) => (mobileView === view ? "flex" : "hidden lg:flex");
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3">
+    <div className="flex flex-1 flex-col gap-3 p-3">
       <div role="tablist" aria-label="Dashboard panels" className="flex gap-1 lg:hidden">
         {MOBILE_VIEWS.map((v) => (
           <button
@@ -42,7 +44,7 @@ function DashboardBody({ ctx }: { ctx: RunScopeContext }) {
           </button>
         ))}
       </div>
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className={`${mobileView === "report" ? "hidden lg:grid" : "grid"} shrink-0 grid-cols-1 gap-3 lg:h-[max(660px,calc(100vh-11rem))] lg:grid-cols-2`}>
         <AgentNetworkPanel
           agents={live.agents}
           tasks={live.tasks}
@@ -57,13 +59,21 @@ function DashboardBody({ ctx }: { ctx: RunScopeContext }) {
           <TimelinePanel
             agents={live.agents}
             events={events}
+            tasks={live.tasks}
             selectedAgentId={selected}
             onSelectAgent={selectAgent}
             className={show("timeline")}
           />
-          <TasksPanel runId={runId} tasks={live.tasks} agents={live.agents} events={events} className={show("tasks")} />
+          <TasksPanel runId={runId} tasks={live.tasks} agents={live.agents} events={events} runEnded={live.ended} runSource={live.run.source} className={show("tasks")} />
         </div>
       </div>
+      <ReportPanel
+        run={live.run}
+        tasks={live.tasks}
+        agents={live.agents}
+        runEnded={live.ended}
+        className={`${show("report")} min-h-[320px] shrink-0 lg:max-h-[85vh]`}
+      />
       <AgentInspector
         agentId={inspectorAgentId}
         fallback={inspectorAgentId ? agentById.get(inspectorAgentId) : undefined}

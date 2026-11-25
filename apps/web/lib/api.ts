@@ -14,6 +14,7 @@ import type {
   RunListItem,
   RunListParams,
   RunRead,
+  RunRetry,
   RunnerStatusResponse,
   RunSnapshot,
   SystemStatus,
@@ -125,6 +126,8 @@ export const api = {
   getRun: (id: string) => apiFetch<RunRead>(`${v1}/runs/${encodeURIComponent(id)}`),
   createRun: (body: RunCreate) =>
     apiFetch<RunRead>(`${v1}/runs`, { method: "POST", body: JSON.stringify(body) }),
+  retryRun: (id: string, body: RunRetry = {}) =>
+    apiFetch<RunRead>(`${v1}/runs/${encodeURIComponent(id)}/retry`, { method: "POST", body: JSON.stringify(body) }),
   cancelRun: (id: string) =>
     apiFetch<RunRead>(`${v1}/runs/${encodeURIComponent(id)}/cancel`, { method: "POST" }),
   snapshot: (id: string) => apiFetch<RunSnapshot>(`${v1}/runs/${encodeURIComponent(id)}/snapshot`),
