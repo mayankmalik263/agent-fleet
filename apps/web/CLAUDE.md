@@ -4,7 +4,8 @@
 
 - **What it is:** the dark monitoring console for Agent Fleet (package `@agent-fleet/web`).
   Home page `/` is the "Multi-Agent Fleet" dashboard: Agent Network (React Flow), Cross-Agent
-  Collaboration timeline, Teamwork Tasks, Agent Inspector drawer and New Run modal.
+  Collaboration (Story view by default, Lanes view), Teamwork Tasks (Retry task), Final Report (Panel D:
+  Markdown, copy, download, Retry run), Agent Inspector drawer and New Run modal (web access toggle).
 - **Stack:** Next.js 16.4.6 (App Router, Turbopack), React 19.3.1, TypeScript 6.0.3 (strict),
   Tailwind CSS 4.3.5, `@xyflow/react` 13.0.3, TanStack React Query 5.108.4, lucide-react 1.78.0.
   Tests: Vitest 5.1.1 + Testing Library + jsdom 31. ESLint 10 with `eslint-config-next` 16.4.6.
@@ -30,6 +31,12 @@
   - Our CSS loads before React Flow CSS so the `@layer` order puts `xyflow` above Tailwind base.
 
 ## Change log
+
+- 2026-11-25 — Added Panel D Final Report (`features/report/`, `lib/report.ts`), the safe Markdown renderer
+  (`components/ui/Markdown.tsx`), the Story view of Panel B (`lib/activity.ts`, `ActivityFeed.tsx`),
+  retry (`hooks/useRetryRun.ts`, TaskCard) and the web access toggle. The dashboard body scrolls; the
+  grid no longer shrinks under the report. Why: the timeline was hard to read, and there was no report
+  and no retry. Checks: lint, typecheck, 60 tests, build.
 
 - 2026-11-25 — Built the dashboard from scratch (all files in `apps/web`). Why: frontend for the
   Agent Fleet MVP. Checks: typecheck, lint, 49 Vitest tests and `next build` pass.

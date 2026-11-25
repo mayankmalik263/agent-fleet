@@ -22,6 +22,7 @@ follows the text description of the "Multi-Agent Fleet" console.
 | Left column (≈50%) | Panel A: Agent Network | `features/network/AgentNetworkPanel.tsx` |
 | Right column, top | Panel B: Cross-Agent Collaboration timeline | `features/timeline/TimelinePanel.tsx` |
 | Right column, bottom | Panel C: Teamwork Tasks | `features/tasks/TasksPanel.tsx` |
+| Full width, below | Panel D: Final Report | `features/report/ReportPanel.tsx` |
 
 The stat tiles are Total agents, Running agents (status `running` or `reviewing`), Work items (tasks)
 and Messages. They describe the selected run. The run comes from `?run=<id>` or is the latest run.
@@ -69,7 +70,28 @@ Selecting a node highlights its parent, its children and the related edges. Othe
 The legend (`NetworkLegend.tsx`) lists system events, agent messages, tool calls, tool results,
 delegation, reviewer activity and errors.
 
-## 5. Timeline
+## 5. Panel B: Story and Lanes
+
+Panel B has two views. **Story** is the default, because the lane chart was hard to read.
+
+- Story (`features/timeline/ActivityFeed.tsx`, logic in `lib/activity.ts`): one row per meaningful step, in
+  sequence order. Each row says who did what: "orchestrator assigned the task “X” to researcher".
+  A tool start and its result are one row. Successful Agent Fleet reporting calls are hidden (their effect
+  has its own row); failed ones show as problems. Run milestones are full-width bands.
+  A summary line counts agents, tasks done and failed, messages, tool calls and problems.
+  Filters: Everything, Conversation, Tool work, Progress, Problems. The view follows new rows while
+  the user is at the bottom. Rows of other agents dim when an agent is selected.
+- Lanes: the time chart below.
+
+## 5a. Panel D: Final Report
+
+`features/report/ReportPanel.tsx` shows `run.final_summary` as Markdown (`components/ui/Markdown.tsx`:
+React elements only, no raw HTML, links only for http, https and mailto). A failed run shows the error
+and **Retry run**; when the error is about missing web access and the run had none, it also shows
+**Retry with web access**. Every task result is listed below. Copy and download give one Markdown file
+(`lib/report.ts`). A retry is always a new run (`POST /runs/{id}/retry`), linked by `retry_of_run_id`.
+
+## 5b. Lanes timeline
 
 The timeline (`features/timeline/`) has one lane per agent, in hierarchy order, and one "System" lane
 for events without an agent.

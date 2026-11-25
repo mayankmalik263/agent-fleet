@@ -43,6 +43,7 @@ This header is **not** authentication. Any local caller can set it. See [SECURIT
 | GET | `/api/v1/runs` | query `limit`, `offset`, `status` (repeatable), `source`, `search`, `sort` | `Page[RunListItem]` | 422 |
 | GET | `/api/v1/runs/{run_id}` | path `run_id` | `RunRead` | 404, 422 |
 | POST | `/api/v1/runs/{run_id}/cancel` | path `run_id` | `RunRead` | 404, 409, 422 |
+| POST | `/api/v1/runs/{run_id}/retry` | body `RunRetry` (`task_id?`, `web_access?`) | `RunRead` (new queued run, `retry_of_run_id` set) | 404, 422 |
 | GET | `/api/v1/runs/{run_id}/snapshot` | path `run_id` | `RunSnapshot` | 404, 422 |
 | GET | `/api/v1/runs/{run_id}/events` | query `limit` (default 500), `offset`, `after` (int ≥ 0, default 0), `event_type` (repeatable), `agent_id` | `Page[EventRead]` | 404, 422 |
 | GET | `/api/v1/runs/{run_id}/events/stream` | query `after` (int ≥ 0); header `Last-Event-ID` | `text/event-stream` (section 3) | 404, 422 (before the stream opens) |

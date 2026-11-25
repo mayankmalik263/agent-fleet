@@ -325,11 +325,12 @@ timeline as `tool.failed` events.
 |---|---|
 | **Header** | Total agents, running agents, work items and messages for the selected run, the run status and the stream status. |
 | **Panel A — Agent Network** | A hierarchy graph. Each node shows initials, name, model, status, tokens (or "Not available"), a live duration, completed tasks and tool calls. Zoom, pan, fit, search and focus. Select a node to highlight its relations; click it to open the **Agent Inspector**. |
-| **Panel B — Cross-Agent Collaboration** | A horizontal timeline with one lane per agent and a System lane. Markers by event category, arrows for messages and delegation, zoom, earliest/latest navigation and filters. |
-| **Panel C — Teamwork Tasks** | Expandable task cards with filters (All, In progress, Pending, In review, Done, Failed) and search. |
+| **Panel B — Cross-Agent Collaboration** | **Story** view (default): what each agent did, in plain sentences and time order, with a run summary and filters (Conversation, Tool work, Progress, Problems). **Lanes** view: a timeline with one lane per agent, markers, arrows, zoom and filters. |
+| **Panel C — Teamwork Tasks** | Expandable task cards with filters (All, In progress, Pending, In review, Done, Failed) and search. A failed task of a finished run has **Retry task**. |
+| **Panel D — Final Report** | The orchestrator's final report as Markdown, every task result, copy and download (`.md`), a large view, and **Retry run** / **Retry with web access** when a run failed. |
 | **Other pages** | Runs, Agent Network, Tasks, Messages, Agents, Providers (Claude Code, runner and Graphify status) and Settings. |
 
-Below 1024 px wide, a **Network / Timeline / Tasks** switcher replaces the two columns. See
+Below 1024 px wide, a **Network / Timeline / Tasks / Report** switcher replaces the two columns. See
 [docs/DESIGN.md](docs/DESIGN.md) for the full design system.
 
 ---
@@ -364,7 +365,7 @@ All endpoints live under `/api/v1` (interactive docs at http://127.0.0.1:8420/do
 | Area | Endpoints |
 |---|---|
 | Health and system | `GET /health` · `GET /system/status` · `GET /system/providers` · `GET /runner/status` · `GET /overview` |
-| Runs | `POST /runs` · `GET /runs` · `GET /runs/{id}` · `POST /runs/{id}/cancel` · `GET /runs/{id}/snapshot` |
+| Runs | `POST /runs` · `GET /runs` · `GET /runs/{id}` · `POST /runs/{id}/cancel` · `POST /runs/{id}/retry` · `GET /runs/{id}/snapshot` |
 | Events | `GET /runs/{id}/events` · `GET /runs/{id}/events/stream` (SSE) |
 | Agents | `GET /runs/{id}/agents` · `GET /agents/{id}` · `PATCH /agents/{id}` |
 | Tasks | `GET /runs/{id}/tasks` · `GET /tasks/{id}` · `PATCH /tasks/{id}` |
@@ -437,7 +438,7 @@ All settings are environment variables with the `AGENT_FLEET_` prefix, read from
 | `AGENT_FLEET_RUN_TIMEOUT_SECONDS` | `1800` | Hard limit per run |
 | `AGENT_FLEET_RUNNER_MAX_CONCURRENT_RUNS` | `1` | Runs one runner executes at the same time |
 | `AGENT_FLEET_EDIT_BASH_ALLOWLIST` | `git status,git diff *,git log *` | Shell commands allowed in *Workspace edit* runs |
-| `AGENT_FLEET_ALLOW_WEB_TOOLS` | `false` | Give agents WebSearch and WebFetch |
+| `AGENT_FLEET_ALLOW_WEB_TOOLS` | `false` | Default web access (WebSearch, WebFetch) for API runs without `web_access`. The New Run form sets it per run |
 | `AGENT_FLEET_CLAUDE_PATH` | *(auto-detect)* | Path to the `claude` executable |
 
 The full list with comments is in [`.env.example`](.env.example) and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).

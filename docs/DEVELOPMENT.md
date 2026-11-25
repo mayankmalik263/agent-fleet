@@ -170,7 +170,7 @@ repository root (`apps/backend/agent_fleet/core/config.py`). Environment variabl
 | `AGENT_FLEET_CLAUDE_PATH` | empty (search `PATH`) | must be an existing file | Claude Code executable |
 | `AGENT_FLEET_CLAUDE_DETECT_TIMEOUT_SECONDS` | `20.0` | | Timeout of each detection command |
 | `AGENT_FLEET_ALLOWED_WORKSPACE_ROOTS` | empty | `;` or `,` separated | Folders that runs may use (besides `data/workspaces`) |
-| `AGENT_FLEET_ALLOW_WEB_TOOLS` | `false` | | Add `WebSearch` and `WebFetch` to runner sessions |
+| `AGENT_FLEET_ALLOW_WEB_TOOLS` | `false` | | Default `web_access` for runs that do not set it (the New Run form sets it) |
 | `AGENT_FLEET_EDIT_BASH_ALLOWLIST` | `git status,git diff *,git log *` | comma separated | Bash patterns for `workspace_edit` runs. Test runners (`pytest *`, `npm test *`) run project code; add them only for trusted folders |
 | `AGENT_FLEET_KEEP_API_KEY_ENV` | `false` | | Keep `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` for Claude Code |
 | `AGENT_FLEET_COMMERCIAL_MODE` | `false` | | `true` stops the runner |

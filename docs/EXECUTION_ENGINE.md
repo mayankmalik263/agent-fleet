@@ -226,7 +226,12 @@ the `Agent` calls to them. Test: `tests/test_runner.py::test_e2e_fake_claude_thr
 
 `runner/policy.policy_args()` turns `runs.permission_policy` into CLI options.
 `MCP` below means the 12 rules `mcp__agent-fleet__<tool>` for every tool except `create_run`.
-`web` means `WebSearch,WebFetch`, added only when `AGENT_FLEET_ALLOW_WEB_TOOLS=true`.
+`web` means `WebSearch,WebFetch`, added only when the run has `web_access=true`. The New Run form sets it
+(default on). API calls without the field use `AGENT_FLEET_ALLOW_WEB_TOOLS`.
+
+The runner also sets `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`. Subagents then run in the foreground: the
+orchestrator waits for each result, and the dashboard sees each real end. A background subagent returns
+"Async agent launched" at once; the event mapper ignores that result and keeps the agent running.
 
 | Option | `read_only` (default) | `workspace_edit` |
 |---|---|---|

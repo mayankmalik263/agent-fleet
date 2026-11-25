@@ -94,8 +94,8 @@ A run without a workspace uses an empty folder `data/workspaces/<run_id>/`.
 Every runner session gets an explicit policy (`runner/policy.py`). Details:
 [EXECUTION_ENGINE.md, section 4](EXECUTION_ENGINE.md#4-permission-policies).
 
-- `read_only` (default): tools `Read`, `Grep`, `Glob`, `Agent` (plus web tools only when
-  `AGENT_FLEET_ALLOW_WEB_TOOLS=true`). Mode `dontAsk`. `Bash`, `Edit`, `Write`, `NotebookEdit` are denied.
+- `read_only` (default): tools `Read`, `Grep`, `Glob`, `Agent` (plus `WebSearch` and `WebFetch` only when the
+  run has `web_access=true`). Mode `dontAsk`. `Bash`, `Edit`, `Write`, `NotebookEdit` are denied.
 - `workspace_edit`: adds `Edit`, `Write` and allowlisted `Bash` patterns in mode `acceptEdits`. A deny list
   blocks destructive commands such as `rm`, `git push`, `git reset`, `curl`, `Remove-Item`, and the
   file-writing options `git diff --output` and `git log --output`.
@@ -246,7 +246,8 @@ A multi-user or hosted deployment needs at least these items. None of them is im
 1. Keep `AGENT_FLEET_API_HOST=127.0.0.1`.
 2. Keep `read_only` unless a run must change files.
 3. Add only trusted folders to `AGENT_FLEET_ALLOWED_WORKSPACE_ROOTS`.
-4. Keep `AGENT_FLEET_ALLOW_WEB_TOOLS=false` unless a run needs the web.
+4. Turn off web access for runs on private code. A web request can carry workspace content (for example
+   after a prompt injection in a file). Research runs without a workspace need web access.
 5. Do not put secrets in task descriptions.
 6. Keep `.env` out of version control (`.gitignore` already excludes it).
 7. Report security problems privately to the repository owner. Do not include credentials.
