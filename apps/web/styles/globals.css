@@ -1,0 +1,219 @@
+@layer theme, base, xyflow, components, utilities;
+
+@import "tailwindcss";
+
+/*
+  Palette. Change these variables to re-theme the whole dashboard.
+  Components use only these tokens (through the Tailwind theme below or var()).
+*/
+:root {
+  --af-bg: #171719;
+  --af-panel: #242428;
+  --af-panel-2: #2b2b30;
+  --af-border: #44434b;
+  --af-border-soft: #34333a;
+  --af-primary: #a855f7;
+  --af-blue: #3b82f6;
+  --af-green: #22c55e;
+  --af-orange: #f97316;
+  --af-yellow: #eab308;
+  --af-red: #ef4444;
+  --af-text: #f4f4f5;
+  --af-text-2: #a1a1aa;
+  --af-text-3: #8b8b95;
+  --af-focus: #c084fc;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--af-bg);
+  --color-panel: var(--af-panel);
+  --color-panel-2: var(--af-panel-2);
+  --color-line: var(--af-border);
+  --color-line-soft: var(--af-border-soft);
+  --color-primary: var(--af-primary);
+  --color-blue: var(--af-blue);
+  --color-green: var(--af-green);
+  --color-orange: var(--af-orange);
+  --color-yellow: var(--af-yellow);
+  --color-red: var(--af-red);
+  --color-fg: var(--af-text);
+  --color-fg-2: var(--af-text-2);
+  --color-fg-3: var(--af-text-3);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--af-bg);
+    color: var(--af-text);
+  }
+  body {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--af-focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--af-primary) 40%, transparent);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--af-border) transparent;
+  }
+}
+
+@layer components {
+  .af-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--af-text-2);
+  }
+  .af-panel {
+    background: var(--af-panel);
+    border: 1px solid var(--af-border-soft);
+    border-radius: 10px;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.02) inset, 0 8px 24px rgb(0 0 0 / 0.25);
+  }
+  .af-input {
+    background: var(--af-bg);
+    border: 1px solid var(--af-border);
+    border-radius: 6px;
+    color: var(--af-text);
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+  .af-input::placeholder {
+    color: var(--af-text-3);
+  }
+  .af-input:focus-visible {
+    outline: 2px solid var(--af-focus);
+    outline-offset: 0;
+    border-color: transparent;
+  }
+  .af-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--af-border);
+    background: var(--af-panel-2);
+    color: var(--af-text);
+    padding: 4px 9px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    transition: background-color 120ms, border-color 120ms;
+  }
+  .af-btn:hover:not(:disabled) {
+    border-color: var(--af-text-3);
+  }
+  .af-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .af-btn-primary {
+    background: var(--af-primary);
+    border-color: var(--af-primary);
+    color: #fff;
+  }
+  .af-btn-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--af-primary) 88%, white);
+    border-color: color-mix(in srgb, var(--af-primary) 88%, white);
+  }
+  .af-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--af-border-soft);
+    background: var(--af-panel-2);
+    color: var(--af-text-2);
+  }
+  .af-icon-btn:hover:not(:disabled) {
+    color: var(--af-text);
+    border-color: var(--af-border);
+  }
+  .af-icon-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .af-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    border: 1px solid var(--af-border-soft);
+    padding: 2px 9px;
+    font-size: 11px;
+    color: var(--af-text-2);
+    background: transparent;
+  }
+  .af-chip[aria-pressed="true"],
+  .af-chip[aria-selected="true"] {
+    color: var(--af-text);
+    border-color: color-mix(in srgb, var(--af-primary) 70%, transparent);
+    background: color-mix(in srgb, var(--af-primary) 16%, transparent);
+  }
+  .af-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+}
+
+/* React Flow theme overrides for the dark console. */
+.af-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--af-border);
+  --xy-edge-stroke-selected: var(--af-primary);
+  --xy-controls-button-background-color: var(--af-panel-2);
+  --xy-controls-button-background-color-hover: var(--af-panel);
+  --xy-controls-button-color: var(--af-text-2);
+  --xy-controls-button-color-hover: var(--af-text);
+  --xy-controls-button-border-color: var(--af-border-soft);
+  --xy-minimap-background-color: var(--af-bg);
+  --xy-minimap-mask-background-color: rgb(23 23 25 / 0.6);
+  --xy-attribution-background-color: transparent;
+}
+.af-flow .react-flow__node {
+  cursor: pointer;
+}
+.af-flow .react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
+}
+.af-flow .react-flow__edge.af-edge-dim {
+  opacity: 0.18;
+}
+
+@keyframes af-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.af-pulse {
+  animation: af-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .af-pulse {
+    animation: none;
+  }
+  .react-flow__edge-path {
+    animation: none !important;
+  }
+}
