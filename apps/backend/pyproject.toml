@@ -1,0 +1,63 @@
+[project]
+name = "agent-fleet"
+version = "0.2.0"
+description = "Agent Fleet control plane: REST API, MCP server and local Claude Code runner"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.1",
+    "fastapi>=0.165.0",
+    "mcp>=2.3",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.16.3",
+    "sqlalchemy>=2.0",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+agent-fleet-api = "agent_fleet.main:run"
+agent-fleet-mcp = "agent_fleet.mcp.server:main"
+agent-fleet-runner = "agent_fleet.runner.main:main"
+agent-fleet-db = "agent_fleet.database.migrate:main"
+agent-fleet-hook = "agent_fleet.integrations.claude_hooks:main"
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["real_claude: runs the installed Claude Code CLI (opt-in, uses your subscription)"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "ASYNC"]
+ignore = ["S101", "S603", "B008", "UP046", "UP047"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "ASYNC"]
+"migrations/**" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["agent_fleet"]
+plugins = ["pydantic.mypy"]
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[dependency-groups]
+dev = [
+    "anyio>=4.16.0",
+    "httpx>=0.28.1",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]

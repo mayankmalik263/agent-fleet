@@ -1,0 +1,27 @@
+{
+  "name": "agent-fleet",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Agent Fleet: local-first multi-agent orchestration and observability",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "pnpm install && uv sync --directory apps/backend && uv run --directory apps/backend agent-fleet-db upgrade",
+    "dev": "concurrently -k -n api,runner,web -c magenta,blue,green \"pnpm dev:api\" \"pnpm dev:runner\" \"pnpm dev:web\"",
+    "dev:api": "uv run --directory apps/backend agent-fleet-api",
+    "dev:runner": "uv run --directory apps/backend agent-fleet-runner",
+    "dev:web": "pnpm --filter @agent-fleet/web dev",
+    "db:upgrade": "uv run --directory apps/backend agent-fleet-db upgrade",
+    "test": "pnpm test:backend && pnpm test:web",
+    "test:backend": "uv run --directory apps/backend pytest",
+    "test:web": "pnpm --filter @agent-fleet/web test",
+    "lint": "uv run --directory apps/backend ruff check agent_fleet tests && pnpm --filter @agent-fleet/web lint",
+    "typecheck": "uv run --directory apps/backend mypy && pnpm --filter @agent-fleet/web typecheck",
+    "build": "pnpm --filter @agent-fleet/web build"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}
