@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "mcp__agent-fleet__create_run",
+      "mcp__agent-fleet__register_agent",
+      "mcp__agent-fleet__update_agent_status",
+      "mcp__agent-fleet__create_task",
+      "mcp__agent-fleet__update_task_status",
+      "mcp__agent-fleet__submit_task_result",
+      "mcp__agent-fleet__send_agent_message",
+      "mcp__agent-fleet__append_run_event",
+      "mcp__agent-fleet__get_run_snapshot",
+      "mcp__agent-fleet__get_agent_details",
+      "mcp__agent-fleet__complete_run",
+      "mcp__agent-fleet__fail_run",
+      "mcp__agent-fleet__query_code_graph"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--quiet", "--directory", "${CLAUDE_PROJECT_DIR}/apps/backend", "agent-fleet-hook"],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--quiet", "--directory", "${CLAUDE_PROJECT_DIR}/apps/backend", "agent-fleet-hook"],
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--quiet", "--directory", "${CLAUDE_PROJECT_DIR}/apps/backend", "agent-fleet-hook"],
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--quiet", "--directory", "${CLAUDE_PROJECT_DIR}/apps/backend", "agent-fleet-hook"],
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv",
+            "args": ["run", "--quiet", "--directory", "${CLAUDE_PROJECT_DIR}/apps/backend", "agent-fleet-hook"],
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
