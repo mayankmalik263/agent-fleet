@@ -56,6 +56,8 @@ class NewRun:
     max_concurrent_agents: int | None = None
     confirm_workspace_edit: bool = False
     session_id: str | None = None
+    web_access: bool | None = None
+    retry_of_run_id: str | None = None
 
 
 class RunService:
@@ -113,6 +115,8 @@ class RunService:
             permission_policy=data.permission_policy,
             orchestrator_model=data.orchestrator_model,
             max_concurrent_agents=max_agents,
+            web_access=settings.allow_web_tools if data.web_access is None else data.web_access,
+            retry_of_run_id=data.retry_of_run_id,
             session_id=_clean_text(data.session_id, "session_id", 64, required=False),
             started_at=None if runner_managed else now,
             attempt_count=0,
@@ -130,6 +134,8 @@ class RunService:
                 "source": data.source.value,
                 "permission_policy": data.permission_policy.value,
                 "orchestrator_model": data.orchestrator_model,
+                "web_access": run.web_access,
+                "retry_of_run_id": data.retry_of_run_id,
             },
         )
         if data.permission_policy == PermissionPolicy.WORKSPACE_EDIT:
@@ -220,6 +226,54 @@ class RunService:
         self.close_agents(run, AgentStatus.CANCELLED, "stopped because the run was cancelled")
         self.close_tasks(run, "stopped because the run was cancelled")
         return run
+
+    def retry(self, run_id: str, task_id: str | None = None, web_access: bool | None = None) -> Run:
+        """Queue a new run that repeats a finished run, or only one of its tasks.
+
+        A Claude Code session cannot continue after it ends, so a retry is always a new run. The new run
+        keeps the settings of the original run and points back to it with retry_of_run_id.
+        """
+        old = scoped.get_run(self.session, self.workspace_id, run_id)
+        if old.status not in RUN_TERMINAL:
+            raise ValidationFailedError("Only a finished run (completed, failed or cancelled) can be retried")
+        if old.source == RunSource.CLAUDE_CODE:
+            raise ValidationFailedError("Runs started inside Claude Code cannot be retried from Agent Fleet")
+        if task_id is None:
+            title = f"Retry: {old.title}"
+            description = old.task_description
+        else:
+            task = scoped.get_task(self.session, self.workspace_id, task_id, old.id)
+            title = f"Retry task: {task.title}"
+            notes = [
+                "Retry one task of an earlier Agent Fleet run. Do this task again and give a full result.",
+                "",
+                f"GOAL OF THE EARLIER RUN:\n{old.task_description}",
+                "",
+                f"TASK TO RETRY: {task.title}",
+            ]
+            if task.description:
+                notes.append(task.description)
+            if task.error_message:
+                notes += ["", f"WHY IT FAILED LAST TIME: {task.error_message}"]
+            elif task.result_summary:
+                notes += ["", f"LAST RESULT (not good enough): {task.result_summary}"]
+            description = "\n".join(notes)
+        return self.create(
+            NewRun(
+                task_description=description[:MAX_DESCRIPTION],
+                title=title[:MAX_TITLE],
+                source=RunSource.DASHBOARD,
+                provider=old.provider,
+                workspace_path=old.workspace_path,
+                orchestrator_model=old.orchestrator_model,
+                permission_policy=old.permission_policy,
+                max_concurrent_agents=old.max_concurrent_agents,
+                # The user confirmed the edit policy for the original run.
+                confirm_workspace_edit=old.permission_policy == PermissionPolicy.WORKSPACE_EDIT,
+                web_access=old.web_access if web_access is None else web_access,
+                retry_of_run_id=old.id,
+            )
+        )
 
     def close_agents(self, run: Run, status: AgentStatus, reason: str) -> None:
         """Agents that never reported an end are closed with a flag that says so (no invented outcome)."""

@@ -36,6 +36,7 @@ class ExecutionRequest:
     agents_path: Path
     timeout_seconds: int
     max_concurrent_agents: int
+    web_access: bool = False
 
 
 @dataclass

@@ -35,6 +35,10 @@ class Run(Base):
     )
     orchestrator_model: Mapped[str] = mapped_column(String(32), nullable=False, default="sonnet")
     max_concurrent_agents: Mapped[int] = mapped_column(Integer, nullable=False, default=4)
+    # WebSearch and WebFetch for the run's agents. Off unless the run asks for it.
+    web_access: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # The run that this run retries (whole run or one task of it).
+    retry_of_run_id: Mapped[str | None] = mapped_column(ForeignKey("runs.id", ondelete="SET NULL"), index=True)
     session_id: Mapped[str | None] = mapped_column(String(64), index=True)
     started_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
     completed_at: Mapped[datetime | None] = mapped_column(UTCDateTime())

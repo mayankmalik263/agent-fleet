@@ -54,8 +54,9 @@ def mcp_tool_rules() -> list[str]:
     return [f"mcp__{MCP_SERVER_NAME}__{name}" for name in MCP_TOOLS]
 
 
-def policy_args(policy: PermissionPolicy, settings: Settings) -> list[str]:
-    web = list(WEB_TOOLS) if settings.allow_web_tools else []
+def policy_args(policy: PermissionPolicy, settings: Settings, *, web_access: bool | None = None) -> list[str]:
+    allow_web = settings.allow_web_tools if web_access is None else web_access
+    web = list(WEB_TOOLS) if allow_web else []
     if policy == PermissionPolicy.READ_ONLY:
         tools = [*READ_TOOLS, *web]
         allowed = [*tools, *mcp_tool_rules()]

@@ -57,6 +57,14 @@ class RunCreate(BaseModel):
         default=None, ge=1, le=20, description="Default: AGENT_FLEET_MAX_CONCURRENT_AGENTS"
     )
     confirm_workspace_edit: bool = False
+    web_access: bool | None = Field(
+        default=None, description="Allow WebSearch and WebFetch. Default: AGENT_FLEET_ALLOW_WEB_TOOLS"
+    )
+
+
+class RunRetry(BaseModel):
+    task_id: str | None = Field(default=None, description="Retry only this task. Omit to retry the whole run.")
+    web_access: bool | None = Field(default=None, description="Default: the value of the original run")
 
 
 class RunRead(ORM):
@@ -73,6 +81,8 @@ class RunRead(ORM):
     permission_policy: PermissionPolicy
     orchestrator_model: str
     max_concurrent_agents: int
+    web_access: bool
+    retry_of_run_id: str | None
     session_id: str | None
     started_at: datetime | None
     completed_at: datetime | None

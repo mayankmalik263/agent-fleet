@@ -15,6 +15,7 @@ from ..schemas import (
     RunCreate,
     RunListItem,
     RunRead,
+    RunRetry,
     RunSnapshot,
     TaskRead,
 )
@@ -38,8 +39,17 @@ def create_run(body: RunCreate, db: WriteDB, workspace_id: WorkspaceId) -> Run:
             permission_policy=body.permission_policy,
             max_concurrent_agents=body.max_concurrent_agents,
             confirm_workspace_edit=body.confirm_workspace_edit,
+            web_access=body.web_access,
         )
     )
+    db.commit()
+    return run
+
+
+@router.post("/runs/{run_id}/retry", response_model=RunRead, status_code=status.HTTP_201_CREATED)
+def retry_run(run_id: str, body: RunRetry, db: WriteDB, workspace_id: WorkspaceId) -> Run:
+    """Queue a new run that repeats a finished run, or only one of its tasks (body.task_id)."""
+    run = RunService(db, workspace_id, EventSource.API).retry(run_id, body.task_id, body.web_access)
     db.commit()
     return run
 

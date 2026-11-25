@@ -234,6 +234,7 @@ class Runner:
                 agents_path=agents_path,
                 timeout_seconds=self.settings.run_timeout_seconds,
                 max_concurrent_agents=run.max_concurrent_agents,
+                web_access=run.web_access,
             )
             return request, root_id, {name: d.model for name, d in defs.items()}
 
