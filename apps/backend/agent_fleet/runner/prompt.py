@@ -14,6 +14,13 @@ POLICY_TEXT = {
 }
 
 
+WEB_TEXT = {
+    True: "WebSearch and WebFetch are available to you and to the subagents. Use them for current facts, "
+    "papers and documentation, and cite the URLs.",
+    False: "not available. Use only the files in the working directory and say so in the report.",
+}
+
+
 def build_prompt(run: Run, root_agent_id: str, defs: dict[str, AgentDefinition]) -> str:
     agents = "\n".join(f"   - {d.name} (model {d.model}): {d.description}" for d in defs.values())
     return f"""You are the orchestrator of an Agent Fleet run. Agent Fleet shows this work live in a dashboard.
@@ -23,6 +30,7 @@ RUN CONTEXT
 - your agent_id: {root_agent_id} (already registered as "orchestrator", model {run.orchestrator_model})
 - permission policy: {POLICY_TEXT[run.permission_policy]}
 - at most {run.max_concurrent_agents} subagents may work at the same time
+- web access: {WEB_TEXT[run.web_access]}
 
 HOW TO WORK
 1. Read the task. If it is simple, do it yourself; do not delegate for the sake of it.
@@ -37,12 +45,18 @@ HOW TO WORK
 4. Available subagents:
 {agents}
 5. Start independent subagents in the same message so they run in parallel (never more than {run.max_concurrent_agents}).
+   Run them in the foreground (no run_in_background) and wait for their results.
 6. Record important coordination with send_agent_message. Report only real activity. Never invent progress.
 7. When a subagent returns, check its task has a result (get_run_snapshot). If not, call submit_task_result
    with a short summary of what it returned. If a result is weak, ask for a revision or use another agent.
 8. For complex or important results, ask the reviewer subagent to check them before you finish.
-9. Finish with complete_run(run_id, final_summary) where final_summary is the complete final answer.
-   If you cannot finish, call fail_run(run_id, error_message) with the reason.
+9. Finish with complete_run(run_id, final_summary). The dashboard shows final_summary as the FINAL REPORT,
+   so make it the complete deliverable in Markdown (up to about 15,000 characters):
+   - "# <title>", then a short "## Summary" that answers the task directly.
+   - Sections with the findings. Give sources as Markdown links (title, author or site, year) when you have them.
+   - "## Gaps and limits": what failed, what is uncertain, what was not checked.
+   If some tasks failed, still write the report with what you have and list the gaps.
+   Use fail_run(run_id, error_message) only when no useful result came back at all.
 Do not call create_run. Do not put secrets or hidden reasoning in tool arguments.
 
 TASK TITLE: {run.title}
