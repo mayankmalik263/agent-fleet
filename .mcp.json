@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "agent-fleet": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--quiet",
+        "--directory",
+        "apps/backend",
+        "agent-fleet-mcp"
+      ],
+      "env": {}
+    }
+  }
+}
