@@ -24,6 +24,8 @@ When the user asks you to run or record an orchestration:
 ## Current state
 
 - **What it is:** Agent Fleet, a local-first multi-agent orchestration and observability platform (MVP).
+- **Repository:** public at https://github.com/mayankmalik263/agent-fleet (MIT license, branch `master`,
+  tags `v0.1.0` = milestone-1 prototype, `v0.2.0` = local MVP).
 - **Stack:** Python 3.12 + uv (FastAPI 0.165, SQLAlchemy 2.1, Alembic 1.20, Pydantic 2, MCP SDK 2.3), SQLite (WAL);
   dashboard in `apps/web`: Next.js 16.4, React 19.3, @xyflow/react 13, TanStack Query 5, Tailwind 4, Vitest 5
   (pnpm 11, Node 22+). `apps/web/CLAUDE.md` has the dashboard details.
@@ -61,6 +63,8 @@ When the user asks you to run or record an orchestration:
 
 ## Change log
 
+- 2026-11-25 — Published the repository on GitHub (public, MIT, topics, tags v0.1.0 and v0.2.0). Fixed the
+  README contents links (heading emoji changed the anchors). Files: README.md, CLAUDE.md. Why: user request.
 - 2026-11-25 — Rewrote README.md as the public project page (diagrams, screenshots, usage, API, security,
   roadmap). Added the MIT LICENSE and production-build screenshots in docs/images/. Why: publish on GitHub.
 - 2026-11-25 — Fixed 13 findings of an independent backend review (process kill on runner shutdown, stderr
