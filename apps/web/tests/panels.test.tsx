@@ -57,6 +57,7 @@ describe("Cross-Agent Collaboration timeline", () => {
     const user = userEvent.setup();
     const onSelectAgent = vi.fn();
     renderWithClient(<TimelinePanel agents={agents} events={events} selectedAgentId={null} onSelectAgent={onSelectAgent} />);
+    await user.click(screen.getByRole("tab", { name: "Lanes" }));
     const lanes = screen.getByRole("list", { name: "Timeline lanes" });
     expect(within(lanes).getAllByRole("listitem")).toHaveLength(4);
     expect(within(lanes).getByText("System")).toBeInTheDocument();
@@ -78,6 +79,7 @@ describe("Cross-Agent Collaboration timeline", () => {
   it("filters event types and searches lanes", async () => {
     const user = userEvent.setup();
     renderWithClient(<TimelinePanel agents={agents} events={events} selectedAgentId={null} onSelectAgent={() => {}} />);
+    await user.click(screen.getByRole("tab", { name: "Lanes" }));
     await user.click(screen.getByRole("button", { name: "Filter event types" }));
     await user.click(screen.getByRole("button", { name: "Tool calls" }));
     const timeline = screen.getByTestId("timeline");

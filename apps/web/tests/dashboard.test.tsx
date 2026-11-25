@@ -59,6 +59,7 @@ describe("Fleet dashboard", () => {
       events.forEach((e) => es.emit(e, e.sequence_number));
     });
     await waitFor(() => expect(screen.getByTestId("connection-status")).toHaveTextContent("Live"));
+    act(() => screen.getByRole("tab", { name: "Lanes" }).click());
     await waitFor(() => expect(screen.getByTestId("timeline").querySelectorAll("[data-category]")).toHaveLength(6));
 
     act(() => {
