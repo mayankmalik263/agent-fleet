@@ -61,6 +61,8 @@ When the user asks you to run or record an orchestration:
 
 ## Change log
 
+- 2026-11-25 — Rewrote README.md as the public project page (diagrams, screenshots, usage, API, security,
+  roadmap). Added the MIT LICENSE and production-build screenshots in docs/images/. Why: publish on GitHub.
 - 2026-11-25 — Fixed 13 findings of an independent backend review (process kill on runner shutdown, stderr
   reader limit, long/blank result text, Host header check, lease recovery and run ownership, safer Bash allowlist,
   SSE end timing, typed task filter, result on cancelled task, hook root agent, permissionMode pass-through,
