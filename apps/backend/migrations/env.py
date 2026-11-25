@@ -27,9 +27,30 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     engine = config.attributes.get("engine") or build_engine(_url())
     with engine.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata, render_as_batch=True)
-        with context.begin_transaction():
-            context.run_migrations()
+        sqlite = connection.dialect.name == "sqlite"
+        raw = connection.connection.driver_connection if sqlite else None
+        if raw is not None:
+            # Batch mode rebuilds a table: copy, DROP the old table, rename. With foreign keys on, the DROP
+            # runs ON DELETE CASCADE and deletes every child row (agents, tasks, events). Turn the checks
+            # off outside the transaction (SQLite ignores this PRAGMA inside one), check after, turn back on.
+            raw.execute("PRAGMA foreign_keys=OFF")
+        try:
+            context.configure(connection=connection, target_metadata=target_metadata, render_as_batch=True)
+            with context.begin_transaction():
+                context.run_migrations()
+                if raw is not None:
+                    problems = connection.exec_driver_sql("PRAGMA foreign_key_check").fetchall()
+                    if problems:
+                        raise RuntimeError(f"migration broke foreign keys: {problems[:5]}")
+            if connection.in_transaction():
+                connection.commit()
+        except BaseException:
+            if connection.in_transaction():
+                connection.rollback()
+            raise
+        finally:
+            if raw is not None:
+                raw.execute("PRAGMA foreign_keys=ON")
 
 
 if context.is_offline_mode():
